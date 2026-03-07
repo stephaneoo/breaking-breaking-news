@@ -8,19 +8,19 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --bg:         #0a0a12;
-  --bg2:        #14141f;
-  --bg3:        #1e1e2a;
-  --text:       #ccc;
-  --text-dim:   #777;
-  --text-mid:   #999;
-  --border:     #4a4a66;
-  --border-dim: #333348;
-  --handle:     #2e2e42;
-  --handle-b:   #555570;
-  --knob-grad:  radial-gradient(circle at 40% 35%, #2a2a40, #151520);
-  --dot:        #999;
-  --accent:     #6688ff;
+  --bg:         #111118;
+  --bg2:        #1c1c28;
+  --bg3:        #282838;
+  --text:       #ddd;
+  --text-dim:   #999;
+  --text-mid:   #bbb;
+  --border:     #555570;
+  --border-dim: #444458;
+  --handle:     #3a3a50;
+  --handle-b:   #666680;
+  --knob-grad:  radial-gradient(circle at 40% 35%, #353548, #222230);
+  --dot:        #bbb;
+  --accent:     #7799ff;
 }
 
 body.day {
@@ -647,19 +647,10 @@ function randomizeStations() {
 
 // ── Cut-up mode ───────────────────────────────────────────────────────────────
 function enterCutup() {
-  const shuffled = poolSlice(currentPool);
   channels.forEach((ch, i) => {
-    ch.station = shuffled[i];
-    ch.nameEl.innerHTML = shuffled[i].name.replace('\n', '<br>');
-    ch.fill.style.background = shuffled[i].color + '33';
     const g = i === 0 ? 1.0 : 0.0;
     ch.baseGain = g; ch.dispGain = g;
-    if (ch.audio) {
-      ch.audio.src = shuffled[i].url;
-      ch.audio.muted = g === 0;
-      ch.audio.volume = g * masterVol;
-      if (playing) ch.audio.play().catch(() => {});
-    }
+    applyGain(ch);
     updateFader(ch);
   });
   cutupIndex = 0; cutupFrames = 0;
