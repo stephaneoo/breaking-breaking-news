@@ -800,16 +800,23 @@ const btnDay  = document.getElementById('btn-day');
 const btnMode = document.getElementById('btn-mode');
 const depthWrap = document.getElementById('depth-wrap');
 
+// modes: 'smooth', 'cut', 'manual'
+let mode = 'smooth';
+
 function applyModeUI() {
-  if (cutupMode) {
+  btnMode.classList.add('active');
+  if (mode === 'cut') {
     btnMode.textContent = '[ cut ]';
-    btnMode.classList.add('active');
     depthWrap.style.visibility = 'hidden';
+    cutupMode = true; autoMode = false;
+  } else if (mode === 'manual') {
+    btnMode.textContent = '[ manual ]';
+    depthWrap.style.visibility = 'hidden';
+    cutupMode = false; autoMode = false;
   } else {
     btnMode.textContent = '[ smooth ]';
-    btnMode.classList.add('active');
     depthWrap.style.visibility = 'visible';
-    autoMode = true;
+    cutupMode = false; autoMode = true;
     channels.forEach(ch => {
       ch.autoTarget = Math.max(0, Math.min(1, ch.baseGain + (Math.random() - 0.5) * 0.5));
     });
@@ -844,12 +851,12 @@ btnRnd.addEventListener('click', () => {
 });
 
 btnMode.addEventListener('click', () => {
-  cutupMode = !cutupMode;
-  autoMode = !cutupMode; // smooth = auto always on
-  if (cutupMode) {
+  const modes = ['smooth', 'cut', 'manual'];
+  mode = modes[(modes.indexOf(mode) + 1) % modes.length];
+  if (mode === 'cut') {
     lfoSpeedMult = 0.6;
     if (started) enterCutup();
-  } else {
+  } else if (mode === 'smooth') {
     channels.forEach(ch => {
       ch.baseGain = 0.5; ch.dispGain = 0.5;
       applyGain(ch); updateFader(ch);
