@@ -653,16 +653,15 @@ function enterCutup() {
 }
 
 function cutupStep() {
-  const prev = cutupIndex;
   let next;
-  do { next = Math.floor(Math.random() * N); } while (next === prev && N > 1);
+  do { next = Math.floor(Math.random() * N); } while (next === cutupIndex && N > 1);
+  // silence ALL channels, then solo the new one
+  channels.forEach((ch, i) => {
+    const g = i === next ? 1.0 : 0.0;
+    ch.baseGain = g; ch.dispGain = g;
+    applyGain(ch); updateFader(ch);
+  });
   cutupIndex = next;
-  channels[prev].baseGain = 0; channels[prev].dispGain = 0;
-  applyGain(channels[prev]);
-  updateFader(channels[prev]);
-  channels[cutupIndex].baseGain = 1.0; channels[cutupIndex].dispGain = 1.0;
-  applyGain(channels[cutupIndex]);
-  updateFader(channels[cutupIndex]);
 }
 
 // ── Audio ─────────────────────────────────────────────────────────────────────
@@ -833,6 +832,7 @@ btnMode.addEventListener('click', () => {
   cutupMode = !cutupMode;
   autoMode = !cutupMode; // smooth = auto always on
   if (cutupMode) {
+    lfoSpeedMult = 0.6;
     if (started) enterCutup();
   } else {
     channels.forEach(ch => {
