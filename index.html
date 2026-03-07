@@ -752,7 +752,6 @@ async function startAudio() {
   for (let i = 0; i < N; i++) {
     const ch = channels[i];
     const el = new Audio();
-    el.crossOrigin = 'anonymous';
     el.src = ch.station.url;
 
     ch.audio = el;
