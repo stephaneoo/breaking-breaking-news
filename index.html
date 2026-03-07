@@ -497,7 +497,7 @@ const TRACK_H = isMobile ? 140 : 220, HANDLE_H = isMobile ? 11 : 13;
 let driftAmount = 1.0, masterVol = 0.8;
 
 let started = false, playing = false, autoMode = true, dayMode = true, cutupMode = false;
-let lfoSpeedMult = 0.04;
+let lfoSpeedMult = 0.1;
 let cutupIndex = 0, cutupFrames = 0;
 
 function cutupInterval() {
@@ -790,7 +790,7 @@ function makeKnob(id, initVal, onChange) {
 }
 
 makeKnob('knob-drift', 1.0, v => { driftAmount = v; });
-makeKnob('knob-speed', 0.04, v => { lfoSpeedMult = 0.003 + v * 0.997; });
+makeKnob('knob-speed', 0.1, v => { lfoSpeedMult = 0.003 + v * 0.997; });
 
 // ── Buttons ───────────────────────────────────────────────────────────────────
 const btnPlay = document.getElementById('btn-play');
