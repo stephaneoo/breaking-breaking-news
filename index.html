@@ -726,27 +726,30 @@ function tick() {
   channels.forEach(ch => {
     // auto mode: move baseGain toward autoTarget (skip if user is dragging)
     if (autoMode && !ch.dragging) {
-      // chaos controls auto speed
-      const speed = ch.autoSpeed * (0.3 + chaos * 3);
+      // intensity peaks at chaos 0.5, then plateaus
+      const intensity = Math.min(chaos * 2, 1);
+      // floor rises from 0 → ~0.85 as chaos goes 0 → 1
+      const minLevel = chaos * 0.85;
+      const speed = ch.autoSpeed * (0.3 + intensity * 3);
       const dir = Math.sign(ch.autoTarget - ch.baseGain);
       ch.baseGain += dir * speed;
-      ch.baseGain = Math.max(0, Math.min(1, ch.baseGain));
+      ch.baseGain = Math.max(minLevel, Math.min(1, ch.baseGain));
       if (Math.abs(ch.baseGain - ch.autoTarget) < 0.01) {
-        // chaos pushes minimum fader level up — more chaos = more voices
-        const minLevel = chaos * 0.6;
         const othersMax = Math.max(...channels.filter(c => c !== ch).map(c => Math.max(c.baseGain, c.autoTarget)));
         ch.autoTarget = othersMax < 0.3
           ? 0.65 + Math.random() * 0.35
-          : Math.random() < (0.15 - chaos * 0.14) ? minLevel
-          : minLevel + Math.random() * (0.95 - minLevel);
+          : Math.random() < (0.15 - intensity * 0.14) ? minLevel
+          : minLevel + Math.random() * (1 - minLevel);
       }
     }
 
-    // drift: micro LFO — chaos controls both speed and depth
+    // drift: micro LFO — intensity controls wobble, but faders clamp to floor
     if (autoMode) {
-      ch.lfoPhase += ch.lfoSpeed * (0.1 + chaos * 2);
-      const mod = Math.sin(ch.lfoPhase) * ch.lfoDepth * chaos * ch.baseGain;
-      ch.dispGain = Math.max(0, Math.min(1, ch.baseGain + mod));
+      const intensity = Math.min(chaos * 2, 1);
+      const minLevel = chaos * 0.85;
+      ch.lfoPhase += ch.lfoSpeed * (0.1 + intensity * 2);
+      const mod = Math.sin(ch.lfoPhase) * ch.lfoDepth * intensity * ch.baseGain;
+      ch.dispGain = Math.max(minLevel, Math.min(1, ch.baseGain + mod));
     } else {
       ch.dispGain = ch.baseGain;
     }
