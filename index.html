@@ -101,6 +101,7 @@ h1 {
   border-radius: 2px;
   position: relative;
   overflow: hidden;
+  cursor: pointer;
 }
 
 .vu-bar {
@@ -560,17 +561,14 @@ function makeChannelEl(parent, station, initGain) {
   attachFaderEvents(ch, track, handle);
   updateFader(ch);
 
-  // tap name to solo
-  nameEl.addEventListener('click', e => {
-    e.stopPropagation();
+  // tap anywhere on channel to solo (only on quick taps, not drags)
+  function toggleSolo() {
     if (ch.soloed) {
-      // unsolo: restore all channels, unfreeze so automation resumes
       ch.soloed = false;
       ch.frozen = false;
       nameEl.style.color = '';
       channels.forEach(c => { c.muted = false; c.col.style.opacity = ''; applyGain(c); });
     } else {
-      // solo this channel
       channels.forEach(c => {
         c.soloed = false; c.muted = true;
         if (c.nameEl) c.nameEl.style.color = '';
@@ -578,13 +576,16 @@ function makeChannelEl(parent, station, initGain) {
       });
       ch.soloed = true;
       ch.muted = false;
-      ch.frozen = true;  // freeze fader — no automation until manually touched
+      ch.frozen = true;
       ch.baseGain = 1.0; ch.dispGain = 1.0;
       ch.col.style.opacity = '';
       nameEl.style.color = 'var(--accent)';
       channels.forEach(c => { applyGain(c); updateFader(c); });
     }
-  });
+  }
+  nameEl.addEventListener('click', e => { e.stopPropagation(); toggleSolo(); });
+  // tap VU meter to solo too (bigger target on mobile)
+  col.querySelector('.vu').addEventListener('click', e => { e.stopPropagation(); toggleSolo(); });
 
   return ch;
 }
