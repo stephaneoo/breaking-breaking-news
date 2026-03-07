@@ -567,13 +567,18 @@ function makeChannelEl(parent, station, initGain) {
       // unsolo: restore all channels
       ch.soloed = false;
       nameEl.style.color = '';
-      channels.forEach(c => { c.muted = false; });
+      ch.baseGain = ch.preSoloGain ?? ch.baseGain;
+      ch.dispGain = ch.baseGain;
+      channels.forEach(c => { c.muted = false; applyGain(c); updateFader(c); });
     } else {
       // solo this channel
       channels.forEach(c => { c.soloed = false; c.muted = true; if (c.nameEl) c.nameEl.style.color = ''; });
       ch.soloed = true;
       ch.muted = false;
+      ch.preSoloGain = ch.baseGain;
+      ch.baseGain = 1.0; ch.dispGain = 1.0;
       nameEl.style.color = 'var(--accent)';
+      channels.forEach(c => { applyGain(c); updateFader(c); });
     }
   });
 
