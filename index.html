@@ -262,10 +262,16 @@ h1 {
   letter-spacing: 3px;
 }
 
+/* ── Mode toggle ── */
+#btn-mode { letter-spacing: 1px; font-size: 11px; }
+#mode-smooth, #mode-cut { transition: color 0.2s, opacity 0.2s; }
+.mode-on { color: var(--accent); opacity: 1; }
+.mode-off { opacity: 0.35; }
+
 /* Night toggle — discreet corner */
 #btn-day {
   position: fixed;
-  bottom: 70px;
+  top: 16px; bottom: auto;
   left: 50%;
   transform: translateX(-50%);
   font-size: 38px;
@@ -411,7 +417,7 @@ h1 {
 <div id="bottom">
   <button class="btn" id="btn-play">▶</button>
   <button class="btn" id="btn-rnd" title="randomize stations">🎲</button>
-  <button class="btn" id="btn-mode">[ cut ]</button>
+  <button class="btn" id="btn-mode"><span id="mode-smooth">smooth</span> · <span id="mode-cut">cut</span></button>
 </div>
 <button class="btn" id="btn-day">☽</button>
 <div id="status">click anywhere to start</div>
@@ -796,15 +802,20 @@ const speedWrap = document.getElementById('speed-wrap');
 // modes: 'smooth', 'cut', 'manual'
 let mode = 'smooth';
 
+const modeSmooth = document.getElementById('mode-smooth');
+const modeCut = document.getElementById('mode-cut');
+
 function applyModeUI() {
   btnMode.classList.add('active');
   if (mode === 'cut') {
-    btnMode.textContent = '→ smooth';
+    modeSmooth.className = 'mode-off';
+    modeCut.className = 'mode-on';
     depthWrap.style.visibility = 'hidden';
     speedWrap.style.visibility = 'visible';
     cutupMode = true; autoMode = false;
   } else {
-    btnMode.textContent = '→ cut';
+    modeSmooth.className = 'mode-on';
+    modeCut.className = 'mode-off';
     depthWrap.style.visibility = 'visible';
     speedWrap.style.visibility = 'visible';
     cutupMode = false; autoMode = true;
