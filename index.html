@@ -263,13 +263,14 @@ h1 {
 /* Night toggle — discreet corner */
 #btn-day {
   position: fixed;
-  bottom: 16px;
-  right: 20px;
-  font-size: 16px;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 28px;
   padding: 4px 8px;
   letter-spacing: 0;
   border: none;
-  opacity: 0.4;
+  opacity: 0.35;
   filter: grayscale(1);
   transition: opacity 0.3s, filter 0.2s;
 }
@@ -465,9 +466,15 @@ async function fetchStations() {
 // Fill to N stations, repeating pool if needed
 function poolSlice(pool) {
   if (pool.length === 0) return [];
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  // never repeat a station — only use unique entries
+  const seen = new Set();
   const out = [];
-  while (out.length < N) out.push(...pool);
-  return out.sort(() => Math.random() - 0.5).slice(0, N);
+  for (const s of shuffled) {
+    if (!seen.has(s.url)) { seen.add(s.url); out.push(s); }
+    if (out.length >= N) break;
+  }
+  return out;
 }
 
 const N = 8;
