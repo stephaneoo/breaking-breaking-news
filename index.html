@@ -84,6 +84,11 @@ h1 {
   align-items: center;
   gap: 14px;
   width: 64px;
+  cursor: pointer;
+}
+.channel:not(.master) .channel-strip,
+.channel:not(.master) .channel-strip * {
+  pointer-events: none;
 }
 
 .channel.master { width: 72px; }
