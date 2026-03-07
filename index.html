@@ -410,8 +410,8 @@ h1 {
     <div class="knob-wrap" id="depth-wrap" style="display:none">
     </div>
     <div class="knob-wrap" id="speed-wrap">
-      <div class="knob-label">Speed</div>
-      <div class="knob" id="knob-speed"><div class="knob-dot"></div></div>
+      <div class="knob-label">Chaos</div>
+      <div class="knob" id="knob-chaos"><div class="knob-dot"></div></div>
     </div>
   </div>
 </div>
@@ -494,15 +494,13 @@ const N = 8;
 const isMobile = window.matchMedia('(max-width: 600px)').matches;
 const TRACK_H = isMobile ? 140 : 220, HANDLE_H = isMobile ? 11 : 13;
 
-let driftAmount = 1.0, masterVol = 0.8;
+let chaos = 0.0, masterVol = 0.8;
 
 let started = false, playing = false, autoMode = true, dayMode = true, cutupMode = false;
-let lfoSpeedMult = 0.003;
 let cutupIndex = 0, cutupFrames = 0;
 
 function cutupInterval() {
-  // speed knob: slow ~8s → fast ~0.1s (6–10 switches/sec at max)
-  return Math.max(2, Math.round(25 / (0.04 + lfoSpeedMult * 2.5)));
+  return Math.max(2, Math.round(25 / (0.04 + chaos * 2.5)));
 }
 
 const channels = []; // 6 channel strips
@@ -728,23 +726,26 @@ function tick() {
   channels.forEach(ch => {
     // auto mode: move baseGain toward autoTarget (skip if user is dragging)
     if (autoMode && !ch.dragging) {
+      // chaos controls auto speed
+      const speed = ch.autoSpeed * (0.3 + chaos * 3);
       const dir = Math.sign(ch.autoTarget - ch.baseGain);
-      ch.baseGain += dir * ch.autoSpeed;
+      ch.baseGain += dir * speed;
       ch.baseGain = Math.max(0, Math.min(1, ch.baseGain));
       if (Math.abs(ch.baseGain - ch.autoTarget) < 0.01) {
-        // anti-silence: if all others are heading low, force this one up
+        // chaos pushes minimum fader level up — more chaos = more voices
+        const minLevel = chaos * 0.6;
         const othersMax = Math.max(...channels.filter(c => c !== ch).map(c => Math.max(c.baseGain, c.autoTarget)));
         ch.autoTarget = othersMax < 0.3
-          ? 0.65 + Math.random() * 0.35   // someone must be loud
-          : Math.random() < 0.15 ? 0       // occasionally total silence on one channel
-          : Math.random() * 0.95;
+          ? 0.65 + Math.random() * 0.35
+          : Math.random() < (0.15 - chaos * 0.14) ? minLevel
+          : minLevel + Math.random() * (0.95 - minLevel);
       }
     }
 
-    // drift: micro LFO on top of baseGain — only when auto is on
+    // drift: micro LFO — chaos controls both speed and depth
     if (autoMode) {
-      ch.lfoPhase += ch.lfoSpeed * lfoSpeedMult;
-      const mod = Math.sin(ch.lfoPhase) * ch.lfoDepth * driftAmount * ch.baseGain;
+      ch.lfoPhase += ch.lfoSpeed * (0.1 + chaos * 2);
+      const mod = Math.sin(ch.lfoPhase) * ch.lfoDepth * chaos * ch.baseGain;
       ch.dispGain = Math.max(0, Math.min(1, ch.baseGain + mod));
     } else {
       ch.dispGain = ch.baseGain;
@@ -789,7 +790,7 @@ function makeKnob(id, initVal, onChange) {
   document.addEventListener('touchend', () => { dragging = false; });
 }
 
-makeKnob('knob-speed', 0.0, v => { lfoSpeedMult = 0.003 + v * 0.997; });
+makeKnob('knob-chaos', 0.0, v => { chaos = v; });
 
 // ── Buttons ───────────────────────────────────────────────────────────────────
 const btnPlay = document.getElementById('btn-play');
@@ -856,7 +857,7 @@ btnMode.addEventListener('click', () => {
   const modes = ['smooth', 'cut'];
   mode = modes[(modes.indexOf(mode) + 1) % modes.length];
   if (mode === 'cut') {
-    lfoSpeedMult = 0.6;
+    if (chaos < 0.4) chaos = 0.4;
     if (started) enterCutup();
   } else {
     channels.forEach(ch => {
