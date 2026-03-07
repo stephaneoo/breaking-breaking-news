@@ -664,9 +664,16 @@ function enterCutup() {
 function cutupStep() {
   let next;
   do { next = Math.floor(Math.random() * N); } while (next === cutupIndex && N > 1);
-  // set targets — tick loop will fade
+  // new channel jumps to full immediately, old ones fade out
   channels.forEach((ch, i) => {
-    ch.cutTarget = i === next ? 1.0 : 0.0;
+    if (i === next) {
+      ch.cutTarget = 1.0;
+      ch.dispGain = 1.0;
+      ch.baseGain = 1.0;
+      applyGain(ch); updateFader(ch);
+    } else {
+      ch.cutTarget = 0.0;
+    }
   });
   cutupIndex = next;
 }
