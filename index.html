@@ -8,34 +8,34 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --bg:         #07070f;
-  --bg2:        #0d0d1a;
-  --bg3:        #141428;
-  --text:       #bbb;
-  --text-dim:   #333;
-  --text-mid:   #555;
-  --border:     #3a3a55;
-  --border-dim: #1e1e30;
-  --handle:     #2a2a3e;
-  --handle-b:   #4a4a66;
-  --knob-grad:  radial-gradient(circle at 40% 35%, #1e1e35, #0d0d1a);
-  --dot:        #666;
-  --accent:     #5577ff;
+  --bg:         #0a0a12;
+  --bg2:        #14141f;
+  --bg3:        #1e1e2a;
+  --text:       #ccc;
+  --text-dim:   #777;
+  --text-mid:   #999;
+  --border:     #4a4a66;
+  --border-dim: #333348;
+  --handle:     #2e2e42;
+  --handle-b:   #555570;
+  --knob-grad:  radial-gradient(circle at 40% 35%, #2a2a40, #151520);
+  --dot:        #999;
+  --accent:     #6688ff;
 }
 
 body.day {
   --bg:         #f2ede6;
   --bg2:        #e8e2da;
   --bg3:        #ddd7ce;
-  --text:       #555;
-  --text-dim:   #aaa;
-  --text-mid:   #888;
+  --text:       #444;
+  --text-dim:   #888;
+  --text-mid:   #777;
   --border:     #b8b0a6;
   --border-dim: #d0c8be;
   --handle:     #d8d0c6;
   --handle-b:   #a8a098;
   --knob-grad:  radial-gradient(circle at 40% 35%, #e0d8ce, #c8c0b6);
-  --dot:        #888;
+  --dot:        #777;
   --accent:     #3355cc;
 }
 
@@ -265,11 +265,13 @@ h1 {
   position: fixed;
   bottom: 16px;
   right: 20px;
-  font-size: 9px;
+  font-size: 16px;
   padding: 4px 8px;
-  letter-spacing: 2px;
-  opacity: 0.3;
-  transition: opacity 0.3s, color 0.2s, border-color 0.2s;
+  letter-spacing: 0;
+  border: none;
+  opacity: 0.4;
+  filter: grayscale(1);
+  transition: opacity 0.3s, filter 0.2s;
 }
 #btn-day:hover { opacity: 0.8; }
 
@@ -409,7 +411,7 @@ h1 {
   <button class="btn" id="btn-rnd" title="randomize stations">🎲</button>
   <button class="btn" id="btn-mode">[ cut ]</button>
 </div>
-<button class="btn" id="btn-day">[ night ]</button>
+<button class="btn" id="btn-day">☽</button>
 <div id="status">click anywhere to start</div>
 
 <script>
@@ -848,7 +850,7 @@ const DICE = ['⚀','⚁','⚂','⚃','⚄','⚅'];
 btnDay.addEventListener('click', () => {
   dayMode = !dayMode;
   document.body.classList.toggle('day', dayMode);
-  btnDay.textContent = dayMode ? '[ night ]' : '[ day ]';
+  btnDay.textContent = dayMode ? '☽' : '☀';
   btnDay.classList.toggle('active', dayMode);
 });
 
@@ -869,7 +871,7 @@ document.addEventListener('keydown', autostart, { once: true });
 // ── Init ──────────────────────────────────────────────────────────────────────
 (async function init() {
   document.body.classList.add('day');
-  btnDay.textContent = '[ night ]';
+  btnDay.textContent = '☽';
   btnDay.classList.add('active');
 
   const ok = await fetchStations();
