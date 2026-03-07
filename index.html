@@ -640,7 +640,7 @@ function randomizeStations() {
     ch.fill.style.background = shuffled[i].color + '33';
     if (ch.audio) {
       ch.audio.src = shuffled[i].url;
-      ch.audio.play().catch(() => {});
+      if (playing) ch.audio.play().catch(() => {});
     }
   });
 }
@@ -658,7 +658,7 @@ function enterCutup() {
       ch.audio.src = shuffled[i].url;
       ch.audio.muted = g === 0;
       ch.audio.volume = g * masterVol;
-      ch.audio.play().catch(() => {});
+      if (playing) ch.audio.play().catch(() => {});
     }
     updateFader(ch);
   });
