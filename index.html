@@ -418,10 +418,6 @@ h1 {
 <div id="main">
   <div id="mixer"></div>
   <div id="right-panel">
-    <div class="knob-wrap">
-      <div class="knob-label">Chaos</div>
-      <div class="knob" id="knob-chaos"><div class="knob-dot"></div></div>
-    </div>
     <div class="knob-wrap" id="speed-wrap">
       <div class="knob-label">Speed</div>
       <div class="knob" id="knob-speed"><div class="knob-dot"></div></div>
@@ -507,7 +503,7 @@ const N = 8;
 const isMobile = window.matchMedia('(max-width: 600px)').matches;
 const TRACK_H = isMobile ? 140 : 220, HANDLE_H = isMobile ? 11 : 13;
 
-let chaos = 0.0, speed = 0.3, masterVol = 0.8;
+let speed = 0.3, masterVol = 0.8;
 
 let started = false, playing = false, autoMode = true, dayMode = true, cutupMode = false;
 let cutupIndex = 0, cutupFrames = 0;
@@ -754,8 +750,7 @@ function tick() {
   if (cutupMode) {
     cutupFrames++;
     if (cutupFrames >= cutupInterval()) { cutupFrames = 0; cutupStep(); }
-    // low chaos = quick fade out, high chaos = slow fade = more overlap
-    const fadeSpeed = 0.15 - chaos * 0.12;
+    const fadeSpeed = 0.1;
     channels.forEach(ch => {
       if (ch.frozen) {
         // frozen: skip automation, just update VU
@@ -793,40 +788,27 @@ function tick() {
       ch.vuBar.style.background = ch.station.color + Math.round(v * 200).toString(16).padStart(2,'0');
       return;
     }
-    // auto mode: move baseGain toward autoTarget (skip if user is dragging)
+    // auto mode: drift baseGain toward autoTarget
     if (autoMode && !ch.dragging) {
-      // intensity peaks at chaos 0.5, then plateaus
-      const intensity = Math.min(chaos * 2, 1);
-      // floor rises from 0 → ~0.85 as chaos goes 0 → 1
-      const minLevel = chaos * 0.75;
       const spd = ch.autoSpeed * (0.3 + speed * 3);
       const dir = Math.sign(ch.autoTarget - ch.baseGain);
       ch.baseGain += dir * spd;
-      ch.baseGain = Math.max(minLevel, Math.min(1, ch.baseGain));
+      ch.baseGain = Math.max(0, Math.min(1, ch.baseGain));
       if (Math.abs(ch.baseGain - ch.autoTarget) < 0.01) {
-        // count how many channels are currently audible
         const audible = channels.filter(c => c !== ch && c.baseGain > 0.05).length;
-        const maxAudible = Math.floor(2 + chaos * 5); // 2 at zero, 7 at max
         if (audible < 1) {
-          // always keep at least one channel up
           ch.autoTarget = 0.5 + Math.random() * 0.5;
-        } else if (audible >= maxAudible) {
-          // too many voices — silence this one
-          ch.autoTarget = 0;
         } else {
-          // mix of going up or going silent
           ch.autoTarget = Math.random() < 0.4 ? 0 : 0.3 + Math.random() * 0.7;
         }
       }
     }
 
-    // drift: micro LFO — intensity controls wobble, but faders clamp to floor
+    // LFO wobble
     if (autoMode) {
-      const intensity = Math.min(chaos * 2, 1);
-      const minLevel = chaos * 0.75;
       ch.lfoPhase += ch.lfoSpeed * (0.1 + speed * 2);
-      const mod = Math.sin(ch.lfoPhase) * ch.lfoDepth * (0.05 + intensity * 0.95) * ch.baseGain;
-      ch.dispGain = Math.max(minLevel, Math.min(1, ch.baseGain + mod));
+      const mod = Math.sin(ch.lfoPhase) * ch.lfoDepth * 0.3 * ch.baseGain;
+      ch.dispGain = Math.max(0, Math.min(1, ch.baseGain + mod));
     } else {
       ch.dispGain = ch.baseGain;
     }
@@ -870,7 +852,6 @@ function makeKnob(id, initVal, onChange) {
   document.addEventListener('touchend', () => { dragging = false; });
 }
 
-makeKnob('knob-chaos', 0.0, v => { chaos = v; });
 makeKnob('knob-speed', 0.3, v => { speed = v; });
 
 // ── Buttons ───────────────────────────────────────────────────────────────────
@@ -935,7 +916,6 @@ btnMode.addEventListener('click', () => {
   const modes = ['smooth', 'cut'];
   mode = modes[(modes.indexOf(mode) + 1) % modes.length];
   if (mode === 'cut') {
-    if (chaos < 0.4) chaos = 0.4;
     if (started) enterCutup();
   } else {
     channels.forEach(ch => {
