@@ -429,7 +429,7 @@ h1 {
   <button class="btn" id="btn-rnd" title="randomize stations">🎲</button>
   <button class="btn" id="btn-mode"><span id="mode-drift">drift</span> · <span id="mode-zap">zap</span></button>
 </div>
-<button class="btn" id="btn-day">☽</button>
+<button class="btn" id="btn-day">🌙</button>
 <div id="status">click anywhere to start</div>
 
 <script>
@@ -710,12 +710,17 @@ function cutupStep() {
 }
 
 // ── Audio ─────────────────────────────────────────────────────────────────────
+// iOS: audio.volume is read-only and Web Audio silences cross-origin streams
+// Best we can do is mute/unmute — faders still animate but audio is on/off
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+  || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
 function applyGain(ch) {
   if (!ch.audio) return;
   const raw = ch.muted ? 0 : Math.max(0, Math.min(1, ch.dispGain * masterVol));
   const vol = raw < 0.03 ? 0 : raw;
-  ch.audio.volume = vol;
-  ch.audio.muted = vol === 0;
+  if (!isIOS) ch.audio.volume = vol;
+  ch.audio.muted = vol < 0.03;
 }
 
 async function startAudio() {
@@ -932,7 +937,7 @@ const DICE = ['⚀','⚁','⚂','⚃','⚄','⚅'];
 btnDay.addEventListener('click', () => {
   dayMode = !dayMode;
   document.body.classList.toggle('day', dayMode);
-  btnDay.textContent = dayMode ? '☽' : '☀';
+  btnDay.textContent = dayMode ? '🌙' : '☀';
   btnDay.classList.toggle('active', dayMode);
 });
 
