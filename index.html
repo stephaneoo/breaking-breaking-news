@@ -718,8 +718,8 @@ function applyGain(ch) {
   const raw = ch.muted ? 0 : Math.max(0, Math.min(1, ch.dispGain * masterVol));
   const vol = raw < 0.03 ? 0 : raw;
   if (isIOS) {
-    // iOS: can only mute/unmute — treat fader as on/off at 15% threshold
-    ch.audio.muted = vol < 0.15;
+    // iOS: can only mute/unmute — fader must be above 40% to play
+    ch.audio.muted = vol < 0.4;
   } else {
     ch.audio.volume = vol;
     ch.audio.muted = vol === 0;
