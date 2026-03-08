@@ -732,11 +732,11 @@ async function startAudio() {
 
     el.addEventListener('canplay', () => {
       loaded++;
-      statusEl.textContent = loaded === N ? 'live' : `buffering ${loaded}/${N}`;
+      statusEl.textContent = loaded === N ? 'live · tap a fader to solo' : `buffering ${loaded}/${N}`;
     });
     el.addEventListener('error', () => {
       loaded++;
-      statusEl.textContent = loaded === N ? 'live' : `buffering ${loaded}/${N}`;
+      statusEl.textContent = loaded === N ? 'live · tap a fader to solo' : `buffering ${loaded}/${N}`;
     });
     el.play().catch(() => {});
   }
