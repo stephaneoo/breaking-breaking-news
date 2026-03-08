@@ -328,7 +328,7 @@ h1 {
 #status {
   position: fixed;
   bottom: 18px;
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 3px;
   color: var(--text-dim);
   text-transform: uppercase;
@@ -410,7 +410,7 @@ h1 {
   #btn-play { font-size: 24px; min-width: 56px; padding: 10px 22px; }
   #btn-mode { font-size: 11px; }
 
-  #status { bottom: 10px; font-size: 9px; }
+  #status { bottom: 10px; font-size: 11px; }
   #btn-day { bottom: 8px; right: 10px; }
 }
 </style>
@@ -433,7 +433,7 @@ h1 {
   <button class="btn" id="btn-mode"><span id="mode-drift">drift</span> · <span id="mode-zap">zap</span></button>
 </div>
 <button class="btn" id="btn-day">🌙</button>
-<div id="status">click anywhere to start</div>
+<div id="status">tap a channel to solo</div>
 
 <script>
 // ── Station pool — populated dynamically from radio-browser.info ──────────────
@@ -445,7 +445,7 @@ const COLORS = ["#4488ff","#ff5544","#aa55ff","#44aaff","#ffcc44","#ff8844",
 
 async function fetchStations() {
   const statusEl = document.getElementById('status');
-  statusEl.textContent = 'fetching stations…';
+  statusEl.textContent = 'tap a channel to solo';
   try {
     const queries = [
       { tag: 'news', countrycode: 'US' },
@@ -480,11 +480,10 @@ async function fetchStations() {
       }));
     if (stations.length >= N) {
       currentPool = stations;
-      statusEl.textContent = 'buffering…';
       return true;
     }
   } catch(e) {}
-  statusEl.textContent = 'fetch failed — check connection';
+  statusEl.textContent = 'connection failed';
   return false;
 }
 
@@ -739,11 +738,11 @@ async function startAudio() {
 
     el.addEventListener('canplay', () => {
       loaded++;
-      statusEl.textContent = loaded === N ? 'live · tap a fader to solo' : `buffering ${loaded}/${N}`;
+      statusEl.textContent = 'tap a channel to solo';
     });
     el.addEventListener('error', () => {
       loaded++;
-      statusEl.textContent = loaded === N ? 'live · tap a fader to solo' : `buffering ${loaded}/${N}`;
+      statusEl.textContent = 'tap a channel to solo';
     });
     el.play().catch(() => {});
   }
@@ -951,7 +950,7 @@ async function autostart() {
   btnPlay.textContent = '■';
   btnPlay.classList.add('live');
   btnPlay.classList.remove('active');
-  document.getElementById('status').textContent = 'buffering…';
+  document.getElementById('status').textContent = 'tap a channel to solo';
   await startAudio();
   if (cutupMode) enterCutup();
 }
