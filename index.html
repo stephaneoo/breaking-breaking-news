@@ -419,7 +419,7 @@ h1 {
   <div id="mixer"></div>
   <div id="right-panel">
     <div class="knob-wrap" id="speed-wrap">
-      <div class="knob-label">Speed</div>
+      <div class="knob-label">Chatter</div>
       <div class="knob" id="knob-speed"><div class="knob-dot"></div></div>
     </div>
   </div>
@@ -799,7 +799,7 @@ function tick() {
         if (audible < 1) {
           ch.autoTarget = 0.5 + Math.random() * 0.5;
         } else {
-          ch.autoTarget = Math.random() < 0.4 ? 0 : 0.3 + Math.random() * 0.7;
+          ch.autoTarget = Math.random() < 0.4 ? 0 : Math.random();
         }
       }
     }
@@ -807,7 +807,7 @@ function tick() {
     // LFO wobble
     if (autoMode) {
       ch.lfoPhase += ch.lfoSpeed * (0.1 + speed * 2);
-      const mod = Math.sin(ch.lfoPhase) * ch.lfoDepth * 0.3 * ch.baseGain;
+      const mod = Math.sin(ch.lfoPhase) * ch.lfoDepth * 0.5 * ch.baseGain;
       ch.dispGain = Math.max(0, Math.min(1, ch.baseGain + mod));
     } else {
       ch.dispGain = ch.baseGain;
