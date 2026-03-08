@@ -562,7 +562,7 @@ function makeChannelEl(parent, station, initGain) {
     lfoPhase:   Math.random() * Math.PI * 2,
     lfoSpeed:   0.06 + Math.random() * 0.1,
     lfoDepth:   0.6 + Math.random() * 1.0,
-    autoTarget: Math.random() * 0.9,
+    autoTarget: initGain > 0 ? (0.3 + Math.random() * 0.7) : 0,
     autoSpeed:  0.005 + Math.random() * 0.008,
     gainNode:   null,
     audio:      null,
@@ -712,7 +712,9 @@ function cutupStep() {
 // ── Audio ─────────────────────────────────────────────────────────────────────
 function applyGain(ch) {
   if (!ch.audio) return;
-  const vol = ch.muted ? 0 : Math.max(0, Math.min(1, ch.dispGain * masterVol));
+  const raw = ch.muted ? 0 : Math.max(0, Math.min(1, ch.dispGain * masterVol));
+  // hard mute below threshold — low volumes are still audible on loud streams
+  const vol = raw < 0.03 ? 0 : raw;
   ch.audio.volume = vol;
   ch.audio.muted = vol === 0;
 }
@@ -798,18 +800,18 @@ function tick() {
       ch.baseGain += dir * speed;
       ch.baseGain = Math.max(minLevel, Math.min(1, ch.baseGain));
       if (Math.abs(ch.baseGain - ch.autoTarget) < 0.01) {
-        // count how many channels are currently audible (above 0.2)
-        const audible = channels.filter(c => c !== ch && c.baseGain > 0.2).length;
+        // count how many channels are currently audible
+        const audible = channels.filter(c => c !== ch && c.baseGain > 0.05).length;
         const maxAudible = Math.floor(2 + chaos * 5); // 2 at zero, 7 at max
         if (audible < 1) {
           // always keep at least one channel up
           ch.autoTarget = 0.5 + Math.random() * 0.5;
         } else if (audible >= maxAudible) {
-          // too many voices — fade this one down (but not always to zero)
-          ch.autoTarget = Math.random() * 0.1;
+          // too many voices — silence this one
+          ch.autoTarget = 0;
         } else {
-          // natural spread: full range of targets
-          ch.autoTarget = Math.random();
+          // mix of going up or going silent
+          ch.autoTarget = Math.random() < 0.4 ? 0 : 0.3 + Math.random() * 0.7;
         }
       }
     }
@@ -974,7 +976,8 @@ async function autostart() {
   channels.forEach((ch, i) => {
     const g = [0.7, 0.0, 0.5, 0.0, 0.0, 0.3, 0.0, 0.0][i] ?? 0;
     ch.baseGain = g; ch.dispGain = g;
-    ch.autoTarget = Math.random() * 0.9;
+    // channels starting silent should stay silent initially
+    ch.autoTarget = g > 0 ? (0.3 + Math.random() * 0.7) : 0;
     updateFader(ch);
   });
   requestAnimationFrame(tick);
