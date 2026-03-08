@@ -419,7 +419,7 @@ h1 {
   <div id="mixer"></div>
   <div id="right-panel">
     <div class="knob-wrap" id="speed-wrap">
-      <div class="knob-label">Chatter</div>
+      <div class="knob-label" id="speed-label">Chatter</div>
       <div class="knob" id="knob-speed"><div class="knob-dot"></div></div>
     </div>
   </div>
@@ -868,16 +868,19 @@ const modeSmooth = document.getElementById('mode-drift');
 const modeCut = document.getElementById('mode-zap');
 
 function applyModeUI() {
+  const speedLabel = document.getElementById('speed-label');
   btnMode.classList.add('active');
   if (mode === 'cut') {
     modeSmooth.className = 'mode-off';
     modeCut.className = 'mode-on';
     speedWrap.style.visibility = 'visible';
+    speedLabel.textContent = 'Twitch';
     cutupMode = true; autoMode = false;
   } else {
     modeSmooth.className = 'mode-on';
     modeCut.className = 'mode-off';
     speedWrap.style.visibility = 'visible';
+    speedLabel.textContent = 'Chatter';
     cutupMode = false; autoMode = true;
     channels.forEach(ch => {
       ch.autoTarget = Math.max(0, Math.min(1, ch.baseGain + (Math.random() - 0.5) * 0.5));
