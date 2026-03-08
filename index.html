@@ -3,7 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Breaking Breaking News</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><rect width='128' height='128' rx='24' fill='%23111118'/><circle cx='64' cy='68' r='8' fill='%237799ff'/><path d='M44 68a20 20 0 0 1 40 0' fill='none' stroke='%237799ff' stroke-width='4' stroke-linecap='round'/><path d='M32 68a32 32 0 0 1 64 0' fill='none' stroke='%237799ff' stroke-width='4' stroke-linecap='round' opacity='.6'/><path d='M20 68a44 44 0 0 1 88 0' fill='none' stroke='%237799ff' stroke-width='4' stroke-linecap='round' opacity='.3'/><text x='64' y='108' text-anchor='middle' fill='%23999' font-family='Courier New' font-size='14' letter-spacing='2'>BBN</text></svg>">
+<link rel="apple-touch-icon" href="icon-180.png">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -789,7 +793,7 @@ function tick() {
       const intensity = Math.min(chaos * 2, 1);
       // floor rises from 0 → ~0.85 as chaos goes 0 → 1
       const minLevel = chaos * 0.75;
-      const speed = ch.autoSpeed * (0.6 + intensity * 2.7);
+      const speed = ch.autoSpeed * (0.4 + intensity * 2.9);
       const dir = Math.sign(ch.autoTarget - ch.baseGain);
       ch.baseGain += dir * speed;
       ch.baseGain = Math.max(minLevel, Math.min(1, ch.baseGain));
@@ -806,8 +810,8 @@ function tick() {
     if (autoMode) {
       const intensity = Math.min(chaos * 2, 1);
       const minLevel = chaos * 0.75;
-      ch.lfoPhase += ch.lfoSpeed * (0.2 + intensity * 1.9);
-      const mod = Math.sin(ch.lfoPhase) * ch.lfoDepth * (0.15 + intensity * 0.85) * ch.baseGain;
+      ch.lfoPhase += ch.lfoSpeed * (0.12 + intensity * 1.98);
+      const mod = Math.sin(ch.lfoPhase) * ch.lfoDepth * (0.05 + intensity * 0.95) * ch.baseGain;
       ch.dispGain = Math.max(minLevel, Math.min(1, ch.baseGain + mod));
     } else {
       ch.dispGain = ch.baseGain;
