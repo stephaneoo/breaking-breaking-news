@@ -418,9 +418,13 @@ h1 {
 <div id="main">
   <div id="mixer"></div>
   <div id="right-panel">
-    <div class="knob-wrap" id="speed-wrap">
+    <div class="knob-wrap">
       <div class="knob-label">Chaos</div>
       <div class="knob" id="knob-chaos"><div class="knob-dot"></div></div>
+    </div>
+    <div class="knob-wrap" id="speed-wrap">
+      <div class="knob-label">Speed</div>
+      <div class="knob" id="knob-speed"><div class="knob-dot"></div></div>
     </div>
   </div>
 </div>
@@ -503,13 +507,13 @@ const N = 8;
 const isMobile = window.matchMedia('(max-width: 600px)').matches;
 const TRACK_H = isMobile ? 140 : 220, HANDLE_H = isMobile ? 11 : 13;
 
-let chaos = 0.0, masterVol = 0.8;
+let chaos = 0.0, speed = 0.3, masterVol = 0.8;
 
 let started = false, playing = false, autoMode = true, dayMode = true, cutupMode = false;
 let cutupIndex = 0, cutupFrames = 0;
 
 function cutupInterval() {
-  return Math.max(2, Math.round(25 / (0.04 + chaos * 2.5)));
+  return Math.max(2, Math.round(25 / (0.04 + speed * 2.5)));
 }
 
 const channels = []; // 6 channel strips
@@ -795,9 +799,9 @@ function tick() {
       const intensity = Math.min(chaos * 2, 1);
       // floor rises from 0 → ~0.85 as chaos goes 0 → 1
       const minLevel = chaos * 0.75;
-      const speed = ch.autoSpeed * (0.4 + intensity * 2.9);
+      const spd = ch.autoSpeed * (0.3 + speed * 3);
       const dir = Math.sign(ch.autoTarget - ch.baseGain);
-      ch.baseGain += dir * speed;
+      ch.baseGain += dir * spd;
       ch.baseGain = Math.max(minLevel, Math.min(1, ch.baseGain));
       if (Math.abs(ch.baseGain - ch.autoTarget) < 0.01) {
         // count how many channels are currently audible
@@ -820,7 +824,7 @@ function tick() {
     if (autoMode) {
       const intensity = Math.min(chaos * 2, 1);
       const minLevel = chaos * 0.75;
-      ch.lfoPhase += ch.lfoSpeed * (0.12 + intensity * 1.98);
+      ch.lfoPhase += ch.lfoSpeed * (0.1 + speed * 2);
       const mod = Math.sin(ch.lfoPhase) * ch.lfoDepth * (0.05 + intensity * 0.95) * ch.baseGain;
       ch.dispGain = Math.max(minLevel, Math.min(1, ch.baseGain + mod));
     } else {
@@ -867,6 +871,7 @@ function makeKnob(id, initVal, onChange) {
 }
 
 makeKnob('knob-chaos', 0.0, v => { chaos = v; });
+makeKnob('knob-speed', 0.3, v => { speed = v; });
 
 // ── Buttons ───────────────────────────────────────────────────────────────────
 const btnPlay = document.getElementById('btn-play');
