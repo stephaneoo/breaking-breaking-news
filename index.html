@@ -798,11 +798,19 @@ function tick() {
       ch.baseGain += dir * speed;
       ch.baseGain = Math.max(minLevel, Math.min(1, ch.baseGain));
       if (Math.abs(ch.baseGain - ch.autoTarget) < 0.01) {
-        const othersMax = Math.max(...channels.filter(c => c !== ch).map(c => Math.max(c.baseGain, c.autoTarget)));
-        ch.autoTarget = othersMax < 0.3
-          ? 0.65 + Math.random() * 0.35
-          : Math.random() < (0.15 - intensity * 0.14) ? minLevel
-          : minLevel + Math.random() * (1 - minLevel);
+        // count how many channels are currently audible (above 0.15)
+        const audible = channels.filter(c => c !== ch && c.baseGain > 0.15).length;
+        // at low chaos: keep 2-3 channels up, rest silent
+        // at high chaos: more channels up simultaneously
+        const maxAudible = Math.floor(2 + chaos * 5); // 2 at zero, 7 at max
+        if (audible >= maxAudible) {
+          ch.autoTarget = 0;
+        } else if (audible < 1) {
+          ch.autoTarget = 0.6 + Math.random() * 0.4;
+        } else {
+          ch.autoTarget = Math.random() < 0.45 ? 0
+            : minLevel + Math.random() * (1 - minLevel);
+        }
       }
     }
 
@@ -964,7 +972,7 @@ async function autostart() {
   applyModeUI();
   // smooth mode: spread faders, give each a random auto target
   channels.forEach((ch, i) => {
-    const g = [0.7, 0.4, 0.55, 0.2, 0.65, 0.35, 0.5, 0.15][i] ?? 0.4;
+    const g = [0.8, 0.0, 0.6, 0.0, 0.0, 0.0, 0.45, 0.0][i] ?? 0;
     ch.baseGain = g; ch.dispGain = g;
     ch.autoTarget = Math.random() * 0.9;
     updateFader(ch);
